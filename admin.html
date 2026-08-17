@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Admin Panel - Earn Wallet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+
+  <style>
+    :root { --primary: #6C5CE7; --bg: #f4f6fb; --surface: #FFF; --text: #2D3436; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 30px; }
+    
+    .header { background: linear-gradient(135deg, #4b3ee0, var(--primary)); color: #fff; padding: 25px 20px; text-align: center; font-size: 1.3rem; font-weight: 800; position: sticky; top:0; z-index:10; box-shadow: 0 4px 15px rgba(108,92,231,0.3); border-radius: 0 0 25px 25px; margin-bottom: 20px;}
+    .container { max-width: 600px; margin: 0 auto; padding: 0 15px; }
+    
+    .tabs { display: flex; overflow-x: auto; background: var(--surface); border-radius: 15px; padding: 5px; gap: 5px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+    .tab { flex: 1; text-align: center; padding: 12px 10px; font-weight: 700; color: #888; cursor: pointer; border-radius: 10px; white-space: nowrap; transition: 0.3s; font-size: 0.9rem;}
+    .tab.active { background: rgba(108,92,231,0.1); color: var(--primary); }
+
+    .tab-content { display: none; animation: fadeIn 0.3s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+    .card { background: var(--surface); padding: 20px; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+    h3 { font-size: 1.1rem; margin-bottom: 15px; border-bottom: 2px dashed #eee; padding-bottom: 10px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+    
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: #444; }
+    input, select, textarea { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 0.95rem; outline: none; background: #fafafa; transition: 0.3s; font-weight: 600;}
+    input:focus, textarea:focus, select:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(108,92,231,0.1);}
+    
+    .btn { width: 100%; background: linear-gradient(135deg, var(--primary), #A29BFE); color: #fff; border: none; padding: 15px; border-radius: 12px; font-weight: 800; font-size: 1rem; cursor: pointer; margin-top: 5px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;}
+    .btn:active { transform: scale(0.97); }
+    .btn-green { background: linear-gradient(135deg, #00b894, #00cec9); }
+    .btn-red { background: linear-gradient(135deg, #ff4757, #ff6b81); }
+    .btn-small { width: auto; padding: 10px 15px; font-size: 0.85rem; border-radius: 8px;}
+    
+    .wd-card { border: 1px solid #eee; padding: 15px; border-radius: 15px; margin-bottom: 15px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+    .wd-head { display: flex; justify-content: space-between; font-weight: 800; margin-bottom: 12px; border-bottom: 1px dashed #ddd; padding-bottom: 12px;}
+    .wd-info { font-size: 0.9rem; color: #555; margin-bottom: 15px; line-height: 1.6; }
+    .wd-actions { display: flex; gap: 10px; }
+    
+    .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #2d3436; color: #fff; padding: 12px 25px; border-radius: 30px; font-size: 0.9rem; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 1000; font-weight: 600;}
+    .toast.show { opacity: 1; top: 30px; }
+  </style>
+</head>
+<body>
+  <div class="header"><i class="fas fa-user-shield"></i> Admin Control Panel</div>
+  <div id="toast" class="toast">Saved!</div>
+
+  <div class="container">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('settings', this)"><i class="fas fa-cog"></i> General</div>
+      <div class="tab" onclick="switchTab('withdrawals', this)"><i class="fas fa-wallet"></i> Payouts</div>
+      <div class="tab" onclick="switchTab('ads', this)"><i class="fas fa-ad"></i> Ads & Tasks</div>
+    </div>
+
+    <!-- ================= SETTINGS TAB ================= -->
+    <div id="tab-settings" class="tab-content active">
+      <div class="card">
+        <h3><i class="fas fa-robot"></i> App Details</h3>
+        <div class="form-group"><label>Bot Username (Without @)</label><input type="text" id="botUsername" placeholder="your_bot"></div>
+        <div class="form-group"><label>Currency Symbol</label><input type="text" id="currencySymbol" placeholder="TK"></div>
+      </div>
+      <div class="card">
+        <h3><i class="fas fa-gift"></i> Referral & Bonus</h3>
+        <div class="form-group"><label>Daily Login Bonus (Amount)</label><input type="number" id="dailyBonusAmount" placeholder="20"></div>
+        <div class="form-group"><label>Bonus Per Referral</label><input type="number" id="refBonus" placeholder="5"></div>
+        <div class="form-group"><label>Tutorial Video Link (YouTube)</label><input type="text" id="tutorialLink" placeholder="https://youtube.com/..."></div>
+        <div class="form-group"><label>Support Group/Channel Link</label><input type="text" id="supportLink" placeholder="https://t.me/your_group"></div>
+      </div>
+      <div class="card">
+        <h3><i class="fas fa-money-bill-wave"></i> Withdrawal System</h3>
+        <div class="form-group"><label>Minimum Withdraw Amount</label><input type="number" id="minWithdraw" placeholder="10"></div>
+        <div class="form-group"><label>Withdraw Notice Text</label><textarea id="withdrawNotice" rows="2" placeholder="Example: Payment will be sent in 24 hours"></textarea></div>
+        <div class="form-group"><label>Payment Methods (Comma separated)</label><input type="text" id="paymentMethods" placeholder="Bkash, Nagad, Binance"></div>
+      </div>
+      <button class="btn" onclick="saveSettings()"><i class="fas fa-save"></i> Save General Settings</button>
+    </div>
+
+    <!-- ================= WITHDRAWALS TAB ================= -->
+    <div id="tab-withdrawals" class="tab-content">
+      <div class="card">
+        <h3><i class="fas fa-hourglass-half"></i> Pending Requests</h3>
+        <div id="wd-container">Loading requests...</div>
+      </div>
+    </div>
+
+    <!-- ================= ADS & TASKS TAB ================= -->
+    <div id="tab-ads" class="tab-content">
+      <div class="card">
+        <h3><i class="fas fa-bullhorn"></i> Ad Networks Config</h3>
+        <div class="form-group"><label>Daily Ad Viewing Limit (Per Slot)</label><input type="number" id="dailyAdLimit" placeholder="10"></div>
+        <div class="form-group"><label>Reward Per Ad Watch</label><input type="number" step="0.01" id="adReward" placeholder="0.5"></div>
+        <div id="adsContainer"></div>
+        <button class="btn" onclick="saveAds()"><i class="fas fa-save"></i> Save Ad Settings</button>
+      </div>
+
+      <div class="card">
+        <h3><i class="fas fa-plus-circle"></i> Add New Task</h3>
+        <div class="form-group"><label>Task Name</label><input type="text" id="taskName" placeholder="Subscribe Channel"></div>
+        <div class="form-group"><label>Reward Amount</label><input type="number" id="taskReward" placeholder="5"></div>
+        <div class="form-group"><label>Action URL (Link)</label><input type="text" id="taskUrl" placeholder="https://t.me/..."></div>
+        <div class="form-group"><label>Icon Image URL (Optional)</label><input type="text" id="taskIcon" placeholder="https://.../icon.png"></div>
+        <button class="btn btn-green" onclick="addTask()"><i class="fas fa-plus"></i> Add Task</button>
+      </div>
+      <div class="card">
+        <h3><i class="fas fa-list-check"></i> Existing Tasks</h3>
+        <div id="tasksList"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ✅ Firebase Setup
+    const firebaseConfig = {
+      apiKey: "",
+      authDomain: "--..com",
+      databaseURL: "://-video--default-.firebaseio.com",
+      projectId: "viral-video-82929",
+      storageBucket: "viral--..app",
+      messagingSenderId: "",
+      appId: "1::web:"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    
+    let configData = { adSlots:[], webTasks:{} };
+
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.innerText = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function switchTab(id, el) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('tab-' + id).classList.add('active');
+    }
+
+    // Read Admin Config Realtime
+    db.ref('config').on('value', snap => {
+      if(snap.exists()) {
+        configData = snap.val();
+        if(!configData.adSlots) configData.adSlots = [{},{},{},{}];
+        if(!configData.webTasks) configData.webTasks = {};
+        
+        // Populate Inputs
+        document.getElementById('botUsername').value = configData.botUsername || '';
+        document.getElementById('currencySymbol').value = configData.currencySymbol || 'TK';
+        document.getElementById('dailyBonusAmount').value = configData.dailyBonusAmount || 20;
+        document.getElementById('refBonus').value = configData.refBonus || 5;
+        document.getElementById('tutorialLink').value = configData.tutorialLink || '';
+        document.getElementById('supportLink').value = configData.supportLink || '';
+        document.getElementById('minWithdraw').value = configData.minWithdraw || 10;
+        document.getElementById('withdrawNotice').value = configData.withdrawNotice || '';
+        document.getElementById('paymentMethods').value = configData.paymentMethods ? configData.paymentMethods.join(', ') : 'Bkash, Nagad';
+        
+        document.getElementById('dailyAdLimit').value = configData.dailyAdLimit || 10;
+        document.getElementById('adReward').value = configData.adReward || 0.5;
+
+        // Populate Ads Slots
+        let adHtml = '';
+        for(let i=0; i<4; i++) {
+          let slot = configData.adSlots[i] || { network: 'none', id: '' };
+          adHtml += `
+          <div style="background:#f9f9f9; padding:15px; border-radius:12px; border:1px solid #e1e1e1; margin-bottom:12px;">
+            <b style="color:var(--primary); font-size:1rem;"><i class="fas fa-layer-group"></i> Slot ${i+1}</b>
+            <select id="adNet_${i}" style="margin:10px 0;">
+              <option value="none" ${slot.network==='none'?'selected':''}>Disabled (None)</option>
+              <option value="adsgram" ${slot.network==='adsgram'?'selected':''}>Adsgram</option>
+              <option value="monetag" ${slot.network==='monetag'?'selected':''}>Monetag</option>
+              <option value="gigapub" ${slot.network==='gigapub'?'selected':''}>GigaPub</option>
+            </select>
+            <input type="text" id="adId_${i}" value="${slot.id||''}" placeholder="Block ID / Zone ID">
+          </div>`;
+        }
+        document.getElementById('adsContainer').innerHTML = adHtml;
+
+        // Populate Tasks List
+        let taskHtml = '';
+        const tasks = configData.webTasks;
+        if(Object.keys(tasks).length === 0) taskHtml = '<p style="font-size:0.9rem; color:#777; text-align:center;">No tasks found.</p>';
+        
+        Object.keys(tasks).forEach(k => {
+          let t = tasks[k];
+          taskHtml += `
+          <div style="border-bottom:1px solid #eee; padding-bottom:12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <b style="color:var(--text); font-size:1rem;">${t.name}</b> <span style="color:var(--primary); font-weight:800; background:rgba(108,92,231,0.1); padding:2px 8px; border-radius:8px;">+${t.reward}</span><br>
+              <small style="color:#777; word-break:break-all;">${t.url}</small>
+            </div>
+            <button class="btn btn-red btn-small" onclick="deleteTask('${k}')"><i class="fas fa-trash"></i></button>
+          </div>`;
+        });
+        document.getElementById('tasksList').innerHTML = taskHtml;
+      }
+    });
+
+    // Save General Settings
+    function saveSettings() {
+      let methods = document.getElementById('paymentMethods').value.split(',').map(m => m.trim());
+      db.ref('config').update({
+        botUsername: document.getElementById('botUsername').value,
+        currencySymbol: document.getElementById('currencySymbol').value,
+        dailyBonusAmount: Number(document.getElementById('dailyBonusAmount').value),
+        refBonus: Number(document.getElementById('refBonus').value),
+        tutorialLink: document.getElementById('tutorialLink').value,
+        supportLink: document.getElementById('supportLink').value,
+        minWithdraw: Number(document.getElementById('minWithdraw').value),
+        withdrawNotice: document.getElementById('withdrawNotice').value,
+        paymentMethods: methods
+      }).then(() => toast('General Settings Saved!'));
+    }
+
+    // Save Ads Settings
+    function saveAds() {
+      let slots = [];
+      for(let i=0; i<4; i++) {
+        slots.push({
+          network: document.getElementById(`adNet_${i}`).value,
+          id: document.getElementById(`adId_${i}`).value
+        });
+      }
+      db.ref('config').update({
+        dailyAdLimit: Number(document.getElementById('dailyAdLimit').value),
+        adReward: Number(document.getElementById('adReward').value),
+        adSlots: slots
+      }).then(() => toast('Ad Settings Saved!'));
+    }
+
+    // Add New Task
+    function addTask() {
+      let id = 'task_' + Date.now();
+      let data = {
+        name: document.getElementById('taskName').value,
+        reward: Number(document.getElementById('taskReward').value),
+        url: document.getElementById('taskUrl').value,
+        icon: document.getElementById('taskIcon').value || 'https://via.placeholder.com/45'
+      };
+      if(!data.name || !data.url || !data.reward) return toast('Please fill Name, Reward & URL');
+      db.ref('config/webTasks/' + id).set(data).then(() => { 
+        toast('Task Added Successfully'); 
+        document.getElementById('taskName').value = ''; 
+        document.getElementById('taskReward').value = ''; 
+        document.getElementById('taskUrl').value = ''; 
+        document.getElementById('taskIcon').value = ''; 
+      });
+    }
+
+    // Delete Task
+    function deleteTask(id) { 
+      if(confirm('Are you sure you want to delete this task?')) {
+        db.ref('config/webTasks/' + id).remove().then(() => toast('Task Deleted!'));
+      }
+    }
+
+    // Fetch Pending Withdrawals
+    db.ref('withdrawals').orderByChild('status').equalTo('pending').on('value', snap => {
+      let html = '';
+      if(snap.exists()) {
+        snap.forEach(child => {
+          let req = child.val();
+          let key = child.key;
+          let date = new Date(req.timestamp).toLocaleString();
+          
+          html += `
+          <div class="wd-card">
+            <div class="wd-head">
+              <span style="color:#0984e3; background:rgba(9,132,227,0.1); padding:4px 10px; border-radius:8px;">${req.method}</span> 
+              <span style="color:var(--primary); font-size:1.2rem;">${req.amount}</span>
+            </div>
+            <div class="wd-info">
+              <b>Account:</b> <span style="color:#d63031; font-weight:800; font-size:1.05rem;">${req.account}</span><br>
+              <b>User ID:</b> ${req.userId}<br>
+              <b>Name:</b> ${req.userName}<br>
+              <small style="color:#999;">Date: ${date}</small>
+            </div>
+            <div class="wd-actions">
+              <button class="btn btn-green btn-small" style="flex:1" onclick="approveWd('${key}')"><i class="fas fa-check"></i> Approve</button>
+              <button class="btn btn-red btn-small" style="flex:1" onclick="rejectWd('${key}', '${req.userId}', ${req.amount})"><i class="fas fa-times"></i> Reject</button>
+            </div>
+          </div>`;
+        });
+      } else { 
+        html = '<div style="text-align:center; padding:30px 10px; color:#888;"><i class="fas fa-check-circle" style="font-size:3rem; margin-bottom:15px; color:#00b894; opacity:0.8;"></i><br><b style="font-size:1.1rem; color:#444;">No Pending Requests!</b><br>Everything is clear.</div>'; 
+      }
+      document.getElementById('wd-container').innerHTML = html;
+    });
+
+    function approveWd(id) {
+      if(confirm('Are you sure you want to approve this payment?')) {
+        db.ref('withdrawals/' + id).update({ status: 'approved' }).then(() => toast('Payment Approved!'));
+      }
+    }
+
+    async function rejectWd(id, userId, amount) {
+      if(confirm('Reject this request and refund the balance to the user?')) {
+        try {
+          const userRef = db.ref('users/' + userId);
+          const snap = await userRef.once('value');
+          if(snap.exists()){
+            let bal = Number(snap.val().balance || 0);
+            await userRef.update({ balance: bal + Number(amount) }); // Refund
+          }
+          await db.ref('withdrawals/' + id).update({ status: 'rejected' });
+          toast('Rejected & Balance Refunded!');
+        } catch(e) {
+          toast('Error while rejecting!');
+        }
+      }
+    }
+  </script>
+</body>
+</html>
