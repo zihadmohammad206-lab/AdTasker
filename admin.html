@@ -9,7 +9,23 @@
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script> 
+  <script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyD4kPh5Ug6OwlHvb2q9MZeMSDWYFAuVyng",
+    authDomain: "adtasker-39dc5.firebaseapp.com",
+    databaseURL: "https://adtasker-39dc5-default-rtdb.firebaseio.com",
+    projectId: "adtasker-39dc5",
+    storageBucket: "adtasker-39dc5.firebasestorage.app",
+    messagingSenderId: "525142766951",
+    appId: "1:525142766951:web:916509c0bb19e48216abc2",
+    measurementId: "G-86453KRW0Q"
+  };
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  </script>
+  
 
   <style>
     :root { --primary: #6C5CE7; --bg: #f4f6fb; --surface: #FFF; --text: #2D3436; }
