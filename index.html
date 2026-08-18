@@ -113,13 +113,9 @@
     .btn-main { width: 100%; padding: 15px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; border: none; font-size: 1rem; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(108,92,231,0.3); display: flex; align-items: center; justify-content: center; gap: 10px; }
     .btn-main:active { transform: scale(0.98); }
 
-    /* =========================================
-       👑 PREMIUM LEADERBOARD STYLES (FIXED GAPS)
-       ========================================= */
+    /* Leaderboard */
     .leaderboard-title { text-align:center; font-weight:900; font-size:1.3rem; color:var(--text); margin-top:20px; z-index: 20; position: relative; }
-    
     .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 8px; margin: 110px 10px 30px; }
-    
     .podium-item { text-align: center; display: flex; flex-direction: column; align-items: center; position: relative; background: #fff; padding: 15px 8px 10px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.06); width: 31%; }
     .podium-img { width: 55px; height: 55px; border-radius: 50%; border: 3px solid; object-fit: cover; background: #fff; position: absolute; top: -30px; }
     .crown { position: absolute; top: -58px; font-size: 1.8rem; text-shadow: 0 3px 8px rgba(0,0,0,0.3); z-index: 5; }
@@ -130,17 +126,14 @@
     .badge-bal { background: rgba(108,92,231,0.1); color: var(--primary); border: 1px dashed rgba(108,92,231,0.3); }
     .badge-ref { background: rgba(0,184,148,0.1); color: #00b894; border: 1px dashed rgba(0,184,148,0.3); }
     
-    /* Rank 1 (Gold) */
     .rank-1 { z-index: 10; margin: 0 5px; transform: translateY(-20px); width: 35%; border: 2px solid rgba(255,215,0,0.4); background: linear-gradient(180deg, #fff, #fffdf0); }
     .rank-1 .podium-img { width: 70px; height: 70px; border-color: #ffd700; top: -40px; box-shadow: 0 0 20px rgba(255,215,0,0.5); } 
     .rank-1 .crown { color: #ffd700; font-size: 2.5rem; top: -75px; }
     
-    /* Rank 2 (Silver) */
     .rank-2 { border: 2px solid rgba(192,192,192,0.4); background: linear-gradient(180deg, #fff, #f8f9fa); }
     .rank-2 .podium-img { border-color: #c0c0c0; box-shadow: 0 0 15px rgba(192,192,192,0.4);} 
     .rank-2 .crown { color: #c0c0c0; }
     
-    /* Rank 3 (Bronze) */
     .rank-3 { border: 2px solid rgba(205,127,50,0.4); background: linear-gradient(180deg, #fff, #fff9f5); }
     .rank-3 .podium-img { border-color: #cd7f32; box-shadow: 0 0 15px rgba(205,127,50,0.4);} 
     .rank-3 .crown { color: #cd7f32; }
@@ -181,10 +174,10 @@
     .bonus-claim{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;}
     .bonus-close{background:rgba(255,255,255,.08);color:#e5e7eb;border:1px solid rgba(255,255,255,.12);}
   </style>
-</head> 
-  <body>
+</head>
+<body>
 
-  <!-- ✅ Premium Loader -->
+  <!-- Premium Loader -->
   <div id="loader" class="loader-overlay">
     <div class="loader-bg-orb orb1"></div><div class="loader-bg-orb orb2"></div><div class="loader-bg-orb orb3"></div>
     <div class="loader-card">
@@ -195,9 +188,8 @@
     </div>
   </div>
 
-  <div id="toast" class="toast">Alert</div>
-
-  <!-- ✅ Daily Bonus Modal -->
+  <div id="toast" class="toast">Alert</div> 
+    <!-- Daily Bonus Modal -->
   <div id="bonusOverlay" class="bonus-overlay">
     <div class="bonus-card">
       <div class="bonus-glow"></div>
@@ -233,8 +225,6 @@
 
     <!-- ================= TAB 1: HOME ================= -->
     <div id="page-home" class="page-section active">
-      
-      <!-- Open Daily Bonus Button -->
       <div class="sec-head"><i class="fas fa-gift"></i> Daily Rewards</div>
       <div style="padding: 0 20px 15px;">
         <button class="btn-main" onclick="showBonus()" style="background: linear-gradient(135deg, #00b894, #00cec9);"><i class="fas fa-box-open"></i> Open Daily Bonus</button>
@@ -293,17 +283,19 @@
     <i class="fas fa-trophy nav-item" onclick="switchTab('leaderboard', this)"></i>
     <i class="fas fa-wallet nav-item" onclick="switchTab('withdraw', this)"></i>
   </div> 
-      <script>
-    // ✅ Firebase Setup
+    <script>
+    // ✅ Updated Firebase Setup (Your AdTasker Credentials)
     const firebaseConfig = {
-      apiKey: "AIzaSy",
-      authDomain: "viral--82929.firebaseapp.com",
-      databaseURL: "https://viral-video--de.com",
-      projectId: "viral--82929",
-      storageBucket: "viral--82929.appspot.com",
-      messagingSenderId: "",
-      appId: "1::web:"
+      apiKey: "AIzaSyD4kPh5Ug6OwlHvb2q9WZeMSDWYfAuVyng",
+      authDomain: "adtasker-39dc5.firebaseapp.com",
+      databaseURL: "https://adtasker-39dc5-default-rtdb.firebaseio.com",
+      projectId: "adtasker-39dc5",
+      storageBucket: "adtasker-39dc5.firebasestorage.app",
+      messagingSenderId: "525142766951",
+      appId: "1:525142766951:web:916509c0bb19e48216abc2",
+      measurementId: "G-864S3KRW0Q"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const tg = window.Telegram.WebApp;
@@ -497,7 +489,6 @@
         const agSlot = slots.find(s => s.network === 'adsgram');
         const mtSlot = slots.find(s => s.network === 'monetag');
 
-        // 1. Show Adsgram Ad First
         if (agSlot && agSlot.id) {
           subText.innerText = "১ম অ্যাড লোড হচ্ছে (Adsgram)... অ্যাডটি সম্পূর্ণ দেখুন।";
           btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad 1...';
@@ -507,7 +498,6 @@
           if(!res || res.done !== true) throw new Error("Ad Closed or Cancelled");
         }
 
-        // 2. Show Monetag Ad Second
         if (mtSlot && mtSlot.id) {
           subText.innerText = "২য় অ্যাড লোড হচ্ছে (Monetag)... এটি শেষ অ্যাড।";
           btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad 2...';
@@ -518,7 +508,6 @@
           }
         }
 
-        // 3. Claim Money
         btn.innerHTML = '<i class="fas fa-check"></i> Claiming...';
         subText.innerText = "অ্যাড দেখা সফল হয়েছে! বোনাস যোগ করা হচ্ছে...";
         
@@ -583,15 +572,11 @@
     function openTutorial() { if(appState.config.tutorialLink) window.open(appState.config.tutorialLink, '_blank'); else toast('No tutorial available'); }
     function openSupport() { if(appState.config.supportLink) window.open(appState.config.supportLink, '_blank'); }
 
-    // ==========================================
-    // ✅ FIXED REFERRAL AND INITIALIZATION LOGIC 
-    // ==========================================
     window.onload = () => {
       document.getElementById('u-name').innerText = tgUser.first_name;
       document.getElementById('u-id').innerText = 'ID: ' + tgUser.id;
       if(tgUser.photo_url) document.getElementById('u-img').src = tgUser.photo_url;
 
-      // 1. Always Listen to Admin Config
       db.ref('config').on('value', snap => {
         if(snap.exists()) {
           appState.config = snap.val();
@@ -600,13 +585,11 @@
         }
       });
 
-      // 2. Initialize User Carefully to Ensure Referrals Count 100%
       const userRef = db.ref('users/' + tgUser.id);
       userRef.once('value').then(async snap => {
         const today = todayStr();
 
         if(!snap.exists()) {
-          // --- It's a brand new user! ---
           appState.user = { 
             id: tgUser.id, 
             name: tgUser.first_name, 
@@ -620,19 +603,16 @@
             dailyBonusDate: '' 
           };
           
-          // Save new user immediately
           await userRef.set(appState.user);
 
-          // --- Process The Referral Link System ---
           let refBy = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) ? tg.initDataUnsafe.start_param : null;
           
-          if(!refBy) { // Fallback if testing outside telegram natively
+          if(!refBy) {
              const urlParams = new URLSearchParams(window.location.search);
              refBy = urlParams.get('tgWebAppStartParam') || urlParams.get('startapp');
           }
 
           if(refBy && String(refBy) !== String(tgUser.id)) {
-             // We get the actual ref bonus directly from the live config
              let cSnap = await db.ref('config').once('value');
              let rBonus = (cSnap.exists() && cSnap.val().refBonus) ? Number(cSnap.val().refBonus) : 5;
 
@@ -640,7 +620,6 @@
              if(refSnap.exists()){
                 let r = refSnap.val();
                 
-                // ADD the bonus to the referring person's account
                 await db.ref('users/' + refBy).update({
                    referrals: (r.referrals || 0) + 1,
                    balance: (r.balance || 0) + rBonus,
@@ -650,7 +629,6 @@
           }
         }
 
-        // 3. Start Live Listener AFTER Initialization
         userRef.on('value', async liveSnap => {
           if(liveSnap.exists()) {
             appState.user = liveSnap.val();
@@ -677,7 +655,6 @@
       });
     };
 
-    // ✅ FIXED LEADERBOARD (Top 10, Safe Images, Fixed CSS Gaps)
     async function loadLeaderboard() {
       const sym = appState.config.currencySymbol || "TK";
       const snap = await db.ref('users').orderByChild('balance').limitToLast(10).once('value');
@@ -728,4 +705,4 @@
     }
   </script>
 </body>
-</html> 
+</html>
